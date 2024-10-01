@@ -31,9 +31,9 @@ const Listening = () => {
       initial="initial"
       animate="animate"
     >
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-between items-center gap-2 px-1">
         <div className="flex items-center gap-3">
-          <img src={musicLogo} alt="" className="w-12 rounded-md" />
+          <img src={musicLogo} alt="" className="w-14 rounded-2xl" />
           <div>
             <p>Timeless Interlude</p>
             <p className="text-sm text-gray-300">Bryson Tiller</p>

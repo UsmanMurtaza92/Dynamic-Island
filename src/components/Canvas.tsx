@@ -1,23 +1,38 @@
 import React, { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 
+interface ImageData {
+  img: HTMLImageElement;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface bounds {
+  x: number;
+  y: number;
+}
+
 const Canvas = () => {
-  const canvasRef: any = useRef(null);
-  const [images, setImages] = useState<any>([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLCanvasElement | any>(null);
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [offset, setOffset] = useState<bounds>({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas?.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     // Function to draw all images on the canvas
     const drawImages = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      images.forEach((image: any) => {
+      ctx.clearRect(0, 0, canvas?.width, canvas?.height);
+      images.forEach((image: ImageData) => {
         ctx.drawImage(image.img, image.x, image.y, image.width, image.height);
       });
     };
@@ -28,14 +43,14 @@ const Canvas = () => {
     }
 
     // Event listener for pasting images
-    const handlePaste = (e: any) => {
-      const clipboardItems = e.clipboardData.items;
+    const handlePaste = (e: ClipboardEvent) => {
+      const clipboardItems: any = e.clipboardData?.items;
       for (const item of clipboardItems) {
         if (item.type.indexOf("image") !== -1) {
           const blob = item.getAsFile();
           const img = new Image();
           img.onload = () => {
-            setImages((prev: any) => [
+            setImages((prev: ImageData[]) => [
               ...prev,
               { img, x: 50, y: 50, width: img.width, height: img.height },
             ]);
@@ -46,19 +61,19 @@ const Canvas = () => {
     };
 
     // Add paste event listener
-    window.addEventListener("paste", handlePaste);
+    window.addEventListener("paste", handlePaste as EventListener);
 
     return () => {
-      window.removeEventListener("paste", handlePaste);
+      window.removeEventListener("paste", handlePaste as EventListener);
     };
   }, [images]);
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     const img = new Image();
     img.onload = () => {
-      setImages((prev: any) => [
+      setImages((prev: ImageData[]) => [
         ...prev,
         { img, x: 50, y: 50, width: img.width, height: img.height },
       ]);
@@ -66,17 +81,17 @@ const Canvas = () => {
     img.src = URL.createObjectURL(file);
   };
 
-  const handleDragOver = (e: any) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const handleMouseDown = (e: any) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) * (canvas.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-    images.forEach((image: any, index: any) => {
+    images.forEach((image: ImageData, index: number) => {
       if (
         x > image.x &&
         x < image.x + image.width &&
@@ -93,7 +108,7 @@ const Canvas = () => {
     });
   };
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (selectedImageIndex !== null) {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect(); // Get canvas size
@@ -116,10 +131,10 @@ const Canvas = () => {
   };
 
   // Function to delete selected image
-  const handleKeyDown = (e: any) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Delete" && selectedImage !== null) {
       const updatedImages = images.filter(
-        (_: any, index: any) => index !== selectedImage
+        (_: any, index: number) => index !== selectedImage
       );
       setImages(updatedImages);
       setSelectedImageIndex(null);
